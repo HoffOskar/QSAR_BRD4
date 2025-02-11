@@ -1,0 +1,13 @@
+name: brd4
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - rdkit=2024.09.4
+  - pandas=2.2.3
+  - numpy=2.2.1
+  - scikit-learn=1.6.1
+  - matplotlib=3.10.0
+  - seaborn=0.13.2
+  - tqdm=4.67.1
+  - ipykernel=6.29.5
