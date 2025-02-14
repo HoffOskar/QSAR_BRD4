@@ -17,7 +17,9 @@ def render_mol(df):
 
 
 def to_clipboard_smiles(df):
-    """Loads a DataFrame with a "Mol" column to_clipboard"""
+    """
+    Loads a DataFrame with a "Mol" column to_clipboard
+    """
     # Create a copy of the input DataFrame to avoid changes to the original object
     df_copy = copy.deepcopy(df)
 
@@ -34,6 +36,9 @@ def to_clipboard_smiles(df):
 
 
 def convert_ic50nM_to_pic50(IC50_value):
+    """
+    Calculate pIC50 from IC50 values in nM.
+    """
     pIC50_value = 9 - math.log10(IC50_value)
     return pIC50_value
 
@@ -51,7 +56,6 @@ def grid_view(mol_col):
     )
 
 
-### Functions
 def standardize_mol_col(
     mol_col,
     largest_frag=True,
@@ -64,7 +68,44 @@ def standardize_mol_col(
     cleanup=True,
 ):
     """
-    Standardize a pandas.Series of Mol objects ("Mol" column).
+    Standardizes a pandas Series of RDKit Mol objects by applying a sequence of standardization operations.
+
+    Parameters:
+    -----------
+    mol_col : pandas.Series
+        A Series or DataFrame column containing RDKit Mol objects.
+
+    largest_frag : bool
+        Keep only the largest fragment.
+
+    remove_charge : bool
+        Neutralize charged molecules using `rdMolStandardize.Uncharger().uncharge`.
+
+    tautomerize : bool
+        Convert molecules to their most populated tautomer.
+        (This can be slow, so use only when necessary.)
+
+    normalize : bool
+        Apply molecular normalization.
+
+    remove_stereo : bool
+        Removes stereochemical information.
+
+    cal_2D_coord_default : bool
+        Computes 2D coordinates for molecules using `rdDepictor.Compute2DCoords`.
+        (Important for combinatorial libraries.)
+
+    cal_2D_coord_deep : bool
+        Generate 2D coordinate, which can better handle specific structural features (e.g., straightening alkynes to 180°).
+        Overrides `cal_2D_coord_default` if set to True.
+
+    cleanup : bool
+        Cleanup structure.
+
+    Returns:
+    --------
+    pandas.Series
+        A Series or DataFrame column of RDKit Mol objects after applying the selected standardization steps.
     """
 
     # largest fragment only
