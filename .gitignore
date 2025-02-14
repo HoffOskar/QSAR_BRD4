@@ -1,4 +1,3 @@
 utils/__pycache__/
-01_import_eda/temp/
-02_similarity_analysis/temp/
+notebooks/temp/
 .vscode
