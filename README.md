@@ -1,5 +1,34 @@
-# Background
-## Drug Discovery - Oncology
+# QSAR BRD4
+
+Welcome to the QSAR BRD4 repository! This project is still very much work-in-progress and aims to implement various cheminformatics workflows using BRD4 as an exemplary target. The goal is to provide general workflows for
+inhibitor design. 
+
+## Notebook overview
+
+**EDA**
+- [Downloading and preprocessing inhibitors from ChEMBL](01_eda/01_pre_process.ipynb)
+- [Structure-ActivityLandscape Index analysis (activity cliffs)](01_eda/02_activity_cliffs.ipynb) demonstrating the [`utils.similarity_sali`](utils/similarity_sali.py) library
+
+**Generative**
+- [Combinatorial library](02_generative/01_combinat_lib.ipynb)
+
+## Installation
+
+To get started, clone the repository and install the required dependencies:
+
+```bash
+git clone https://github.com/HoffOskar/QSAR_BRD4
+cd QSAR_BRD4
+conda env create -f environment.yml
+conda activate brd4
+```
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Background
+### Drug Discovery - Oncology
 - Overall cost to bring a new anticancer drug to the market ranges from **$944 million** to **$4.54 billion** (2019 USD) - M. Schlander et *al.*: *PharmacoEconomics* 39, 1243–1269 (**2021**)
 - Virtual screening can make the drug discovery funnel more efficient:
 
@@ -7,7 +36,7 @@
 
 (Source: https://multispaninc.com/drug-discovery-services-and-high-throughput-screening)
 
-## The Target - BRD4
+### The Target - BRD4
 Bromodomain-containing protein 4 (BRD4) is a significant target due to its role in regulating gene expression and its involvement in cancer and other diseases.
 
 **1. Role and Function:**
@@ -34,9 +63,10 @@ By interacting with acetylated histones, BRD4 can recruit other transcriptional 
 
 
 
-# Usage
 
-## Functions
+## Usage
+
+### Selected Functions
 **render_mol()**
 
 In this repository chemical structures are predominantly displayed as RDKit mol objects in pandas DataFrames. The function `rdkit.Chem.PandasTools.ChangeMoleculeRendering(df)` is renamed `render_mol()`. It renders the structures if the jupyter notebooks cell output setting are **text/html**:
@@ -46,3 +76,4 @@ In this repository chemical structures are predominantly displayed as RDKit mol 
 Output settings as **text/plain** shows the mol objects id:
 
 ![plain](images/render_plain.png)
+
