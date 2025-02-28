@@ -12,3 +12,4 @@ dependencies:
   - tqdm
   - ipykernel
   - chembl_webresource_client
+  - astartes
