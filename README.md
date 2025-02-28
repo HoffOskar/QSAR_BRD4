@@ -6,15 +6,15 @@ inhibitor design.
 ## Notebook overview
 
 **EDA**
-- [Downloading and preprocessing inhibitors from ChEMBL](01_eda/01_pre_process.ipynb)
-- [Structure-ActivityLandscape Index analysis (activity cliffs)](01_eda/02_activity_cliffs.ipynb) demonstrating the [`MorganSimilarity`](utils/similarity_sali.py) class. 
+- [Preprocessing](01_eda/01_pre_process.ipynb) - downloading and preprocessing inhibitors from ChEMBL
+- [SALI](01_eda/02_activity_cliffs.ipynb) - Structure-Activity Landscape Index analysis (activity cliffs) demonstrating the [`MorganSimilarity`](utils/similarity_sali.py) class. 
 
 **Generative**
-- [Combinatorial library](02_generative/01_combinat_lib.ipynb)
+- [Combinatorial library](02_generative/01_combinat_lib.ipynb) - virtual amidation and Sonogashira couplings
 
 **QSAR Classification Model**
-- [Feture selection](03_QSAR_classifier/01_feature_selection.ipynb) with principal component analysis of Morgan fingerprints. 
-- [QSAR model](03_QSAR_classifier/02_random_forest.ipynb) with a random forest classifier: hyperparameter tuning and agreement-best applicability domain demonstrating the [`RfClfAppDom`](utils/sk_qsar.py) class. 
+- [Feture selection](03_QSAR_classifier/01_feature_selection.ipynb) - principal component analysis of Morgan fingerprints. 
+- [QSAR](03_QSAR_classifier/02_random_forest.ipynb) with a random forest classifier: hyperparameter tuning and agreement-best applicability domain demonstrating the [`RfClfAppDom`](utils/sk_qsar.py) class. 
 
 ## Installation
 
