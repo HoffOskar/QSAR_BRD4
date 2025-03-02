@@ -56,6 +56,8 @@ class RfClfAppDom:
         Threshold for the applicability domain
     mol_col : str
         Column name for the RDKit.Mol objects in df_test
+    pca_model : PCA or None
+        PCA model used for feature transformation
     neigb_sim_np : np.array (2D) or None
         pairwise agreement between train and test compounds
     neigb_dist_np : np.array (1D) or None
@@ -64,13 +66,14 @@ class RfClfAppDom:
         Training data
     """
 
-    def __init__(self, rf_model, df_test, threshold=None, mol_col="Mol"):
+    def __init__(self, rf_model, df_test, threshold=None, mol_col="Mol", pca_model=None):
         self.rf_model = rf_model
         self.n_estimators = rf_model.n_estimators
         self.estimators_np = np.array(rf_model.estimators_)
         self.df_test = df_test
         self.threshold = threshold
         self.mol_col = mol_col
+        self.pca_model = pca_model
         self.neigb_sim_np = None
         self.neigb_dist_np = None
         self.X_train = None
