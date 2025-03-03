@@ -15,6 +15,7 @@ inhibitor design.
 **QSAR Classification Model**
 - [Feture selection](03_QSAR_classifier/01_feature_selection.ipynb) - principal component analysis of Morgan fingerprints. 
 - [QSAR](03_QSAR_classifier/02_random_forest.ipynb) with a random forest classifier: hyperparameter tuning and agreement-best applicability domain demonstrating the [`RfClfAppDom`](utils/sk_qsar.py) class. 
+- [Prediction](03_QSAR_classifier/03_pred_comb_lib.ipynb) of the combinatorial library with the random forest model, including a synthesis recommendation.  
 
 ## Installation
 
