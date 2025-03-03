@@ -2,3 +2,4 @@ utils/__pycache__/
 01_eda/temp/
 .vscode
 data/02_comb_amide_yne_library.pkl
+data/03_pred_comb_library_Rf.pkl

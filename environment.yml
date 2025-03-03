@@ -8,6 +8,7 @@ dependencies:
   - numpy
   - scikit-learn
   - matplotlib
+  - matplotlib-venn 
   - seaborn
   - tqdm
   - ipykernel
