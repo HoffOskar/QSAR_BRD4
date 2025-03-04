@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from matplotlib_venn import venn3
 from sklearn.manifold import TSNE
+from sklearn.neighbors import NearestNeighbors
+from tqdm import tqdm
 
 ###########################################
 ### Visualization functions
@@ -161,7 +164,7 @@ def plot_venn3(df, threshold_dict, labels):
 
 class RfClfAppDom:
     """
-    Class to determine the applicability domain of a Random Forest Classifier.
+    Class to determine the applicability domain of a Random Forest Classifier based on tree agreement.
 
     Attributes:
     ----------
@@ -291,3 +294,247 @@ class RfClfAppDom:
             print(AD_df["AD_value"].describe())
 
         return AD_df
+
+
+class KNeighborAppDom:
+    """
+    Class to determine the applicability domain based on the k-NN distances.
+
+    Attributes:
+    ----------
+    k : int or None
+        Number of nearest neighbors to use.
+    X_train_df : pd.DataFrame or None
+        Training data.
+    RefVal : float or None
+        Reference value for the applicability domain.
+    AD_thresholds : np.array or None
+        AD thresholds for the training data.
+    neigh : NearestNeighbors or None
+        NearestNeighbors object for the training data.
+    """
+
+    def __init__(self, k=None):
+        self.k = k
+        self.X_train_df = None
+        self.RefVal = None
+        self.AD_thresholds = None
+        self.neigh = None
+
+    def explore_k(self, X_train_df, k_values, plot_ref_vals=False):
+        """
+        Plot k against
+            - the count of training compounds with AD radius = 0 (up)
+            - the count of training compounds outside AD ('quasi leave one out').
+
+        Parameters:
+        ----------
+        X_train : pd.DataFrame
+            Training data.
+        k_values : list
+            List of k values to evaluate.
+        plot_ref_vals : bool
+            Plot the Ref_Val against k.
+        """
+
+        ### train_1: full distances matrix from helper function
+        Train_neigb_distances = self._compute_distance_matrix(X_train_df)
+
+        ### Container
+        no_ADs = []
+        out_of_ADs = []
+        Ref_Vals = []
+
+        for k in tqdm(k_values):
+            ### Termine the AD thresholds and global Ref_Val for the training data
+            AD_thresholds, Ref_Val = self._compute_AD_thresholds(
+                Train_neigb_distances, k
+            )
+
+            ### Count the number of training points with AD_threshold = 0
+            no_ADs.append(np.sum(AD_thresholds == 0))
+
+            ### Count the number of training points within AD for each training point
+            AD_count = np.sum(Train_neigb_distances <= AD_thresholds, axis=1)
+
+            ### Count the number of training points one (themselves) or less neighbors within the AD_thresholds
+            out_of_ADs.append(np.sum(AD_count <= 1))
+
+            ### Save the Ref_Val
+            Ref_Vals.append(Ref_Val)
+
+        ### Invert the values of out_of_ADs for plotting
+        inverted_out_of_ADs = [-val for val in out_of_ADs]
+
+        ### Count plot
+        plt.figure(figsize=(10, 6))
+
+        ### Plot no_ADs going up
+        sns.barplot(x=k_values, y=no_ADs, label="Cmpds with AD radius = 0")
+
+        ### Plot out_of_ADs going down
+        sns.barplot(
+            x=k_values,
+            y=inverted_out_of_ADs,
+            color="orange",
+            label='Out of AD ("quasi leave-one out")',
+        )
+
+        plt.xlabel("k")
+        plt.ylabel("Count")
+        plt.legend()
+        plt.grid(axis="y")
+        plt.show()
+
+        ### Plot Ref_Vals
+        if plot_ref_vals:
+            plt.figure(figsize=(10, 6))
+            plt.plot(k_values, Ref_Vals, marker="o", color="red")
+            plt.xlabel("k")
+            plt.ylabel("Ref_Val")
+            plt.grid()
+            plt.show()
+
+    def fit(self, X_train_df, k):
+        """
+        Train the applicability domain model using the chosen k.
+
+        Parameters:
+        ----------
+        X_train : pd.DataFrame
+            Training data.
+        k : int
+            Number of nearest neighbors to use.
+        """
+
+        ### train_1: full distances matrix from helper function
+        Train_neigb_distances = self._compute_distance_matrix(X_train_df)
+
+        ### train_2, 3 and 4 from helper function
+        AD_thresholds, RefVal = self._compute_AD_thresholds(Train_neigb_distances, k)
+
+        ### Save object attributes
+        self.k = k
+        self.X_train_df = X_train_df
+        self.RefVal = RefVal
+        self.AD_thresholds = AD_thresholds
+
+    def predict(self, X_test_df, return_neighbors=False):
+        """
+        Classify new compounds to check if they are within the applicability domain.
+
+        Parameters:
+        ----------
+        X_test_df : pd.DataFrame
+            Test data to classify.
+
+        Returns:
+        -------
+        AD_df : pd.DataFrame
+            DataFrame with the AD status and the number of training compounds within the AD.
+        """
+
+        ### Check if the model is trained
+        if not hasattr(self, "neigh"):
+            raise ValueError("Model is not trained yet. Call `train()` first.")
+
+        ### query 1: Calculate a distances matrix between test (rows) and training (columns) cmpds
+        Test_neigb_distances, Test_neigb_idx = self.neigh.kneighbors(
+            X_test_df, return_distance=True
+        )
+        print(
+            "Shape of distance matrix:",
+            Test_neigb_distances.shape,
+            "(test x training cmpds)",
+        )
+
+        ### query 2: Count the number of training points within the AD_thresholds
+        within_AD_mask = Test_neigb_distances <= self.AD_thresholds
+        counts = np.sum(within_AD_mask, axis=1)
+
+        ### query 3: Calculate the AD for each test point
+        AD = counts != 0
+
+        ### Summarize the results in a DataFrame
+        AD_df = pd.DataFrame(
+            {"AD_status": AD, "AD_density": counts}, index=X_test_df.index
+        )
+
+        ### Return neighbors, if requested
+        if return_neighbors:
+            neighbors_within_AD = [
+                self.X_train_df.index[Test_neigb_idx[i][within_AD_mask[i]]].tolist()
+                for i in range(Test_neigb_idx.shape[0])
+            ]
+            AD_df["train_neigbs_idx"] = neighbors_within_AD
+
+        print(AD.sum(), f"({round(AD.mean() * 100)}%) compounds are within AD")
+
+        return AD_df
+
+    def _compute_distance_matrix(self, X_train_df):
+        """
+        Helper function to compute and store the k-NN distance matrix for the training data.
+
+        Parameters:
+        ----------
+        X_train_df : pd.DataFrame
+            Training data.
+
+        Returns:
+        -------
+        Train_neigb_distances : np.array
+            The full distance matrix for the training data.
+        """
+
+        ### train_1:
+        ### Calculating the full distances matrix for the training set
+        neigh = NearestNeighbors(n_neighbors=X_train_df.shape[0])
+        neigh.fit(X_train_df)
+        Train_neigb_distances, _ = neigh.kneighbors(X_train_df, return_distance=True)
+
+        ### Save the NearestNeighbors object
+        self.neigh = neigh
+
+        return Train_neigb_distances
+
+    def _compute_AD_thresholds(self, Train_neigb_distances, k):
+        """
+        Internal helper function to compute AD metrics using a precomputed distance matrix.
+
+        Parameters:
+        ----------
+        Train_neigb_distances : np.array
+            Precomputed k-NN distance matrix.
+        k : int
+            Number of nearest neighbors.
+
+        Returns:
+        -------
+        AD thresholds : np.array
+            AD thresholds for the training data.
+        RefVal : float
+            Reference value for the applicability domain
+        """
+
+        ### Slicing for the k nearest neighbors, excluding the data point itself
+        Train_k_neigb_distances = Train_neigb_distances[:, 1 : k + 1]
+
+        ### train_2:
+        ### Calculate the mean distances to k neighbors for each training cmpd
+        mean_Train_k_neigb_distances = Train_k_neigb_distances.mean(axis=1)
+
+        ### train_3:
+        ### Tukey’s outlier method for the distances to k neighbors in the training set
+        Q3 = np.quantile(mean_Train_k_neigb_distances, 0.75)
+        Q1 = np.quantile(mean_Train_k_neigb_distances, 0.25)
+        RefVal = Q3 + 1.5 * (Q3 - Q1)
+
+        ### train_4:
+        ### For each training cmpd subset to all distances among the training set smaller/equal to RefVal
+        subsetted_distances = [row[row <= RefVal] for row in Train_neigb_distances]
+
+        ### For each training cmpd calculate the average distance to all neighbors within RefVal
+        AD_thresholds = np.array([array.mean() for array in subsetted_distances])
+
+        return AD_thresholds, RefVal
