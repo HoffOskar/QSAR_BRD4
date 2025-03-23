@@ -10,7 +10,7 @@ inhibitor design.
 - [SALI](01_eda/02_activity_cliffs.ipynb) - Structure-Activity Landscape Index analysis (activity cliffs) demonstrating the [`MorganSimilarity`](utils/similarity_sali.py) class. 
 
 **Generative**
-- [Combinatorial library](02_generative/01_combinat_lib.ipynb) - virtual amidation and Sonogashira couplings
+- [Combinatorial library](02_generative/01_combinat_lib.ipynb) - virtual amidation and Sonogashira couplings to generate novel inhibitors from existing scaffolds. 
 
 **QSAR Classification Model**
 - [Feture selection](03_QSAR_classifier/01_feature_selection.ipynb) - principal component analysis of Morgan fingerprints. 
@@ -18,6 +18,8 @@ inhibitor design.
 - [KNN](03_QSAR_classifier/03_knn_applicability_domain.ipynb) model for distance-based applicability domain definition demonstrating the [`KNeighborAppDom`](utils/sk_qsar.py) class.
 - [Prediction](03_QSAR_classifier/04_pred_comb_lib.ipynb) of the combinatorial library with the random forest model, including a synthesis recommendation.  
 
+**QSAR Regression Model**
+- [MLP](04_QSAR_regression/01_mlp_morgan.ipynb) model with two hidden layers using Morgan fingerprints as input. 
 ## Installation
 
 To get started, clone the repository and install the required dependencies:

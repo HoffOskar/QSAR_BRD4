@@ -14,3 +14,8 @@ dependencies:
   - ipykernel
   - chembl_webresource_client
   - astartes
+  - pytorch=2.6.0
+  - torchmetrics
+  - pyg
+  - networkx
+  - sympy
