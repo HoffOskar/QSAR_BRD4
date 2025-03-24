@@ -14,12 +14,13 @@ inhibitor design.
 
 **QSAR Classification Model**
 - [Feture selection](03_QSAR_classifier/01_feature_selection.ipynb) - principal component analysis of Morgan fingerprints. 
-- [QSAR](03_QSAR_classifier/02_random_forest.ipynb) with a random forest classifier: hyperparameter tuning and agreement-best applicability domain demonstrating the [`RfClfAppDom`](utils/sk_qsar.py) class.
+- [QSAR](03_QSAR_classifier/02_random_forest.ipynb) model with a **random forest** classifier: hyperparameter tuning and agreement-best applicability domain demonstrating the [`RfClfAppDom`](utils/sk_qsar.py) class.
 - [KNN](03_QSAR_classifier/03_knn_applicability_domain.ipynb) model for distance-based applicability domain definition demonstrating the [`KNeighborAppDom`](utils/sk_qsar.py) class.
 - [Prediction](03_QSAR_classifier/04_pred_comb_lib.ipynb) of the combinatorial library with the random forest model, including a synthesis recommendation.  
 
 **QSAR Regression Model**
-- [MLP](04_QSAR_regression/01_mlp_morgan.ipynb) model with two hidden layers using Morgan fingerprints as input. 
+- [QSAR](04_QSAR_regression/01_mlp_morgan.ipynb) model with **multilayer perceptron**: **Bayesian optimization** with pruning for hyperparameter tuning. 
+ 
 ## Installation
 
 To get started, clone the repository and install the required dependencies:

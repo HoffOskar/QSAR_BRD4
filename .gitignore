@@ -1,5 +1,6 @@
 utils/__pycache__/
 01_eda/temp/
+04_QSAR_regression/temp/
 .vscode
 data/02_comb_amide_yne_library.pkl
 data/03_pred_comb_lib_rf.pkl
