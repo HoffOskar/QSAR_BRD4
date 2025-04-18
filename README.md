@@ -20,6 +20,7 @@ inhibitor design.
 
 **QSAR Regression Model**
 - [QSAR](04_QSAR_regression/01_mlp_morgan.ipynb) model with **multilayer perceptron**: **Bayesian optimization** with pruning for hyperparameter tuning. 
+- [QSAR](04_QSAR_regression/02_knn_bemis_murcko_split.ipynb) KNN model demonstrating the benefits of Bemis-Murcko data splitting. 
  
 ## Installation
 

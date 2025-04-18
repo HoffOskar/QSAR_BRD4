@@ -8,6 +8,7 @@ from rdkit import Chem
 from rdkit.Chem import Draw, PandasTools, rdChemReactions, rdCoordGen
 from rdkit.Chem.Draw import rdDepictor
 from rdkit.Chem.MolStandardize import rdMolStandardize
+from rdkit.Chem.Scaffolds import MurckoScaffold
 
 ####################################################################################################
 ### Visualization
@@ -330,5 +331,83 @@ def rxn_2_sms(df, rxn_smarts, mol_col_1="Mol", mol_col_2=None):
     ### Add new columns to the original DataFrame
     for col in products_df.columns:
         df[f"Product_{col}"] = products_df[col]
+
+    return df
+
+
+####################################################################################################
+### Scaffold Analysis
+
+
+def get_bemis_murcko(df, mol_col="Mol", return_smiles=True, return_cluster=False):
+    """
+    Generate standardized generic Bemis-Murcko Fragments.
+
+    Parameters:
+    ----------
+    df : pandas.DataFrame
+        DataFrame containing a column of RDKit Mol objects.
+    mol_col : str
+        Column name containing RDKit Mol objects.
+    return_smiles : bool
+        If True, an additional column 'BM_smiles' with SMILES strings is added to the DataFrame.
+    return_cluster : bool
+        If True, an additional column 'BM_cluster' with cluster IDs is added to the DataFrame.
+
+    Returns:
+    --------
+    df : pandas.DataFrame
+        Updated DataFrame.
+
+    Notes:
+    ------
+    - Generic Bemis-Murcko: Side chains, stereochemistry, and bond orders are removed. Every atom is set to carbon.
+    - Standardized Bemis-Murcko: Standardization results in identical mol objects for compounds with the same scaffold.
+    """
+
+    ### Generate generic Bemis-Murcko scaffold
+    print("MurckoScaffold.MakeScaffoldGeneric")
+    BM_scaf = df[mol_col].progress_apply(MurckoScaffold.MakeScaffoldGeneric)
+
+    ### Generate Bemis-Murcko scaffold
+    #   Apparently this sequence adds robustness
+    print("MurckoScaffold.GetScaffoldForMol")
+    df["BM_mol"] = BM_scaf.progress_apply(MurckoScaffold.GetScaffoldForMol)
+
+    ### Standardize Bemis-Murcko scaffold
+    df["BM_mol"] = standardize_mol_col(
+        df["BM_mol"],
+        largest_frag=False,
+        remove_charge=False,
+    )
+
+    ### Generate scaffold SMILES
+    if return_smiles or return_cluster:
+        ### Generate SMILES
+        print("Chem.MolToSmiles")
+        df["BM_smiles"] = df["BM_mol"].progress_apply(Chem.MolToSmiles)
+
+        ### Standardize SMILES
+        print("rdMolStandardize.StandardizeSmiles")
+        df["BM_smiles"] = df["BM_smiles"].progress_apply(
+            Chem.MolStandardize.rdMolStandardize.StandardizeSmiles
+        )
+
+    ### Generate cluster IDs
+    if return_cluster:
+        ### Get unique scaffolds
+        unique_scaffolds = df["BM_smiles"].unique()
+
+        ### Dictionary to map each scaffold to a cluster ID
+        scaffold_to_cluster = {
+            scaffold: i for i, scaffold in enumerate(unique_scaffolds)
+        }
+
+        ### Map each scaffold to its cluster ID
+        df["BM_cluster"] = df["BM_smiles"].map(scaffold_to_cluster)
+
+    ### Drop SMILES column if not needed
+    if not return_smiles:
+        df.drop(columns=["BM_smiles"], inplace=True)
 
     return df
