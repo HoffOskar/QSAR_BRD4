@@ -8,6 +8,7 @@ inhibitor design.
 **EDA**
 - [Preprocessing](01_eda/01_pre_process.ipynb) - downloading and preprocessing inhibitors from ChEMBL
 - [SALI](01_eda/02_activity_cliffs.ipynb) - Structure-Activity Landscape Index analysis (activity cliffs) demonstrating the [`MorganSimilarity`](utils/similarity_sali.py) class. 
+- [Cluster Analysis](01_eda/03_butina_clustering.ipynb) - Butina clustering in combination with Bemis-Murcko scaffold analysis. 
 
 **Generative**
 - [Combinatorial library](02_generative/01_combinat_lib.ipynb) - virtual amidation and Sonogashira couplings to generate novel inhibitors from existing scaffolds. 
